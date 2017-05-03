@@ -20,6 +20,22 @@ class SbCore(QAxWidget):
             print("disconnected")
         self.login_event_loop.exit()
 
+    def _on_receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
+        if next == '2':
+            self.remained_data = True
+        else:
+            self.remained_data = False
+
+        # rqname에 따른 분기
+        if rqname == "opt10080_req":    # 분봉 차트 요청
+            pass
+
+        # event loop 종료
+        try:
+            self.tr_event_loop.exit()
+        except AttributeError:
+            pass
+
     def _set_signal_slots(self):
         """
         Initializing pyqt things.
@@ -31,6 +47,11 @@ class SbCore(QAxWidget):
         self.dynamicCall("CommConnect()")
         self.login_event_loop = QEventLoop()
         self.login_event_loop.exec_()
+
+    def comm_rq_data(self, rqname, trcode, next, screen_no):
+        self.dynamicCall("CommRqData(QString, QString, int, QString)", rqname, trcode, next, screen_no)
+        self.tr_event_loop = QEventLoop()
+        self.tr_event_loop.exec_()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
