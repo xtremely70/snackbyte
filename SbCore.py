@@ -7,6 +7,11 @@ from PyQt5.QtCore import *
 class SbCore(QAxWidget):
     def __init__(self):
         super().__init__()
+
+        # initialize variables
+        self.login_event_loop = None
+        self.tr_event_loop = None
+
         self._create_kw_instance()
         self._set_signal_slots()
 
@@ -42,6 +47,7 @@ class SbCore(QAxWidget):
         :return: n/a
         """
         self.OnEventConnect.connect(self._on_connect)
+        self.OnReceiveTrData.connect(self._on_receive_tr_data)
 
     def comm_connect(self):
         self.dynamicCall("CommConnect()")
