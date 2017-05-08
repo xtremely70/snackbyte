@@ -38,3 +38,4 @@ Thumbs.db
 
 # Customized #
 .idea/
+__pycache__/
