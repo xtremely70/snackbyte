@@ -16,6 +16,7 @@ class MyWindow(QMainWindow, form_class):
         self.sbcore.comm_connect()
 
         # variables
+        # self.watchList = ['004720']     # for testing only
         self.watchList = ['004720', '008700', '003490']     # for testing only
 
     def get_ohlcv(self):
@@ -31,7 +32,7 @@ class MyWindow(QMainWindow, form_class):
             self.sbcore.set_input_value("수정주가구분", 1)
 
             print("starting comm_rq_data of ", symbol)
-            self.sbcore.comm_rq_data("opt10080_req", "opt10080", 0, "0101")
+            self.sbcore.comm_rq_data("opt10080_req_ma", "opt10080", 0, "0101")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

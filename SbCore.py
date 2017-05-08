@@ -27,6 +27,29 @@ class SbCore(QAxWidget):
         ret = self.dynamicCall("GetRepeatCnt(QString, QString)", trcode, rqname)
         return ret
 
+    def _get_signal_ma(self):
+        """
+        ohlcv 기준으로 ma 계산(종가 기준)
+        :return: Boolean. True - long position 
+        """
+        close20 = list()
+
+        # retrieve close price from self.ohlcv
+        for i in range(21):
+            date, open_price, high, low, close, volume = self.ohlcv[i]
+            # print(i, self.ohlcv[i])
+            close20.append(abs(int(close)))
+
+        # calculate ma20, ma10, ma5
+        ma20 = round(sum(close20[:20])/20)
+        ma1to21 = round(sum(close20[1:21])/20)
+        ma20_delta = ma20 - ma1to21
+        ma10 = round(sum(close20[:10])/10)
+        ma5 = round(sum(close20[:5])/5)
+
+        print(close20)
+        print(ma20, ma1to21, ma20_delta, ma10, ma5)
+
     def _on_connect(self, err_code):
         if err_code == 0:   # connected successfully
             print("connected")
@@ -36,13 +59,13 @@ class SbCore(QAxWidget):
 
     def _on_opt10080(self, rqname, trcode):
         """
-        분봉차트 요청
+        분봉차트 요청(단일 심볼)
         :param rqname: 
         :param trcode: 
         :return: 
         """
         data_cnt = self._get_repeat_cnt(trcode, rqname)
-        print("data_cnt", data_cnt)
+        # print("data_cnt", data_cnt)
 
         self.ohlcv = list()
 
@@ -56,7 +79,7 @@ class SbCore(QAxWidget):
             self.ohlcv.append(
                 (date, open_price, high, low, close, volume)
             )
-            print(date, open_price, high, low, close, volume)
+            # print(date, open_price, high, low, close, volume)
 
     def _on_receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
         if next == '2':
@@ -69,6 +92,9 @@ class SbCore(QAxWidget):
         # rqname에 따른 분기
         if rqname == "opt10080_req":    # 분봉 차트 요청
             self._on_opt10080(rqname, trcode)
+        elif rqname == "opt10080_req_ma":   # 분봉 + MA 요청
+            self._on_opt10080(rqname, trcode)
+            self._get_signal_ma()
 
         # event loop 종료
         try:
