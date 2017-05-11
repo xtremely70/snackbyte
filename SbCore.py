@@ -47,8 +47,8 @@ class SbCore(QAxWidget):
         ma10 = round(sum(close20[:10])/10)
         ma5 = round(sum(close20[:5])/5)
 
-        print(close20)
-        print(ma20, ma1to21, ma20_delta, ma10, ma5)
+        # print(close20)
+        print("MA20", ma20, ma1to21, ma20_delta, "MA10", ma10, "MA5:", ma5)
 
     def _on_connect(self, err_code):
         if err_code == 0:   # connected successfully
@@ -86,8 +86,6 @@ class SbCore(QAxWidget):
             self.remained_data = True
         else:
             self.remained_data = False
-
-        print("tr_received: ", rqname)
 
         # rqname에 따른 분기
         if rqname == "opt10080_req":    # 분봉 차트 요청
