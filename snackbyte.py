@@ -28,9 +28,11 @@ class MyWindow(QMainWindow, form_class):
         :param interval_tick: 구간, 10 = 10분봉
         :return: 
         """
-        print("===========================================")
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        print("===========================================",
+              datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
         for symbol in self.watchList:
+            self.sbcore.set_symbol(symbol)     # Set sbcore's symbol
             self.sbcore.set_input_value("종목코드", symbol)
             self.sbcore.set_input_value("틱범위", "10")
             self.sbcore.set_input_value("수정주가구분", 1)

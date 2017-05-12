@@ -11,6 +11,7 @@ class SbCore(QAxWidget):
         # list of variables
         self.login_event_loop = None
         self.tr_event_loop = None
+        self.current_symbol = None
 
         self._create_kw_instance()
         self._set_signal_slots()
@@ -42,13 +43,23 @@ class SbCore(QAxWidget):
 
         # calculate ma20, ma10, ma5
         ma20 = round(sum(close20[:20])/20)
-        ma1to21 = round(sum(close20[1:21])/20)
-        ma20_delta = ma20 - ma1to21
+        ma20_previous = round(sum(close20[1:21])/20)
+        ma20_delta = ma20 - ma20_previous
+
         ma10 = round(sum(close20[:10])/10)
+        ma10_previous = round(sum(close20[1:11])/10)
+
         ma5 = round(sum(close20[:5])/5)
+        ma5_previous = round(sum(close20[1:6])/5)
 
         # print(close20)
-        print("MA20", ma20, ma1to21, ma20_delta, "MA10", ma10, "MA5:", ma5)
+        print("MA20:", ma20, ma20_previous, ma20_delta,
+              "MA10:", ma10, ma10_previous, "MA5:", ma5, ma5_previous)
+
+        # set position
+        if ma20_delta >= 0:
+            if (ma5_previous <= ma10_previous) and (ma5 > ma10):    # long position
+                print("Long signal : ", self.current_symbol)
 
     def _on_connect(self, err_code):
         if err_code == 0:   # connected successfully
@@ -81,7 +92,8 @@ class SbCore(QAxWidget):
             )
             # print(date, open_price, high, low, close, volume)
 
-    def _on_receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
+    def _on_receive_tr_data(self, screen_no, rqname, trcode,
+                            record_name, next, unused1, unused2, unused3, unused4):
         if next == '2':
             self.remained_data = True
         else:
@@ -117,6 +129,14 @@ class SbCore(QAxWidget):
         self.dynamicCall("CommRqData(QString, QString, int, QString)", rqname, trcode, next, screen_no)
         self.tr_event_loop = QEventLoop()
         self.tr_event_loop.exec_()
+
+    def set_symbol(self, value):
+        """
+        
+        :param value: 
+        :return: nothing.
+        """
+        self.current_symbol = value
 
     def set_input_value(self, id, value):
         """
