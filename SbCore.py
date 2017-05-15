@@ -9,6 +9,8 @@ class SbCore(QAxWidget):
         super().__init__()
 
         # list of variables
+        self.account_no = '8090377411'
+        self.sn = '0000'
         self.login_event_loop = None
         self.tr_event_loop = None
         self.current_symbol = None
@@ -58,8 +60,10 @@ class SbCore(QAxWidget):
 
         # set position
         if ma20_delta >= 0:
-            if (ma5_previous <= ma10_previous) and (ma5 > ma10):    # long position
+            if (ma5_previous < ma10_previous) and (ma5 >= ma10):    # long position
                 print("Long signal : ", self.current_symbol)
+                self._sendOrder("send_order_req", "0101", self.account_no, "1", self.current_symbol,
+                                10, 0, "03", "")
 
     def _on_connect(self, err_code):
         if err_code == 0:   # connected successfully
@@ -111,6 +115,10 @@ class SbCore(QAxWidget):
             self.tr_event_loop.exit()
         except AttributeError:
             pass
+
+    def _sendOrder(self, sRQName, sScreenNo, sAccountNo, nOrderType, sItemCode, nQty, nPrice, sBid, sOrgOrderNo):
+        ret = self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)",
+                               [sRQName, sScreenNo, sAccountNo, nOrderType, sItemCode, nQty, nPrice, sBid, sOrgOrderNo])
 
     def _set_signal_slots(self):
         """
