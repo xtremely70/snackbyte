@@ -19,7 +19,7 @@ class MyWindow(QMainWindow, form_class):
 
         # variables
         # self.watchList = ['004720']     # for testing only
-        self.watchList = ['008970', '033250', '004720', '008700', '003490', '090370']     # for testing only
+        self.watchList = ['008970', '033250', '004720', '008700', '003490', '009270']     # for testing only
 
     def automate_job(self):
         # overlapping call 피하기 위해서 singleShot으로 call
@@ -30,7 +30,8 @@ class MyWindow(QMainWindow, form_class):
                 sys.exit(0)
 
             # OHLCV 값 받아옴
-            self.get_ohlcv()
+            if current_time.minute % 10 == 0:   # 10분 단위
+                self.get_ohlcv()
 
         finally:
             QTimer.singleShot(60000, self.automate_job)
@@ -51,7 +52,7 @@ class MyWindow(QMainWindow, form_class):
             self.sbcore.set_input_value("틱범위", "10")
             self.sbcore.set_input_value("수정주가구분", 1)
 
-            print("starting comm_rq_data of ", symbol)
+            # print("starting comm_rq_data of ", symbol)
             self.sbcore.comm_rq_data("opt10080_req_ma", "opt10080", 0, "0101")
             sleep(0.3)  # 초당 api call 초과하지 않도록
 
@@ -63,4 +64,5 @@ if __name__ == "__main__":
     myWindow.show()
 
     myWindow.automate_job()
+    # myWindow.sbcore._sendOrder("send_order_req", "0101", myWindow.sbcore.account_no, "1", '009270', 10, 0, "03", "")
     app.exec_()

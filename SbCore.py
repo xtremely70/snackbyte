@@ -54,9 +54,9 @@ class SbCore(QAxWidget):
         ma5 = round(sum(close20[:5])/5)
         ma5_previous = round(sum(close20[1:6])/5)
 
-        # print(close20)
-        print("MA20:", ma20, ma20_previous, ma20_delta,
-              "MA10:", ma10, ma10_previous, "MA5:", ma5, ma5_previous)
+        print(self.current_symbol, "MA20, MA10, MA5 현재: ", ma20, ma10, ma5,
+              "과거: ", ma20_previous, ma10_previous, ma5_previous)
+        # print("MA20:", ma20, ma20_previous, ma20_delta, "MA10:", ma10, ma10_previous, "MA5:", ma5, ma5_previous)
 
         # set position
         if ma20_delta >= 0:
@@ -96,19 +96,49 @@ class SbCore(QAxWidget):
             )
             # print(date, open_price, high, low, close, volume)
 
-    def _on_receive_tr_data(self, screen_no, rqname, trcode,
+    def _on_send_order(self, rqname, trcode):
+        pass
+
+    def _on_receive_msg(self, screen_no, request_name, tr_code, msg):
+        """
+        메시지 수신 이벤트
+        :param screen_no: string - 화면번호 
+        :param request_name: request명(사용자 정의)
+        :param tr_code: string 
+        :param msg: string - returned from server
+        :return: n/a
+        """
+        self.msg = request_name + ": " + msg
+        print(self.msg)
+
+    def _on_receive_tr_data(self, screen_no, request_name, trcode,
                             record_name, next, unused1, unused2, unused3, unused4):
+        """
+        transaction 수신 이벤트
+        :param screen_no: string - 화면번호 
+        :param request_name: comm_rq_data()에서 넘어오는 값
+        :param trcode: string
+        :param record_name: string
+        :param next: 다음 데이터('0': 남은 데이터 없음, '2': 남은 데이터 있음)
+        :param unused1: 
+        :param unused2: 
+        :param unused3: 
+        :param unused4: 
+        :return: 
+        """
         if next == '2':
             self.remained_data = True
         else:
             self.remained_data = False
 
         # rqname에 따른 분기
-        if rqname == "opt10080_req":    # 분봉 차트 요청
-            self._on_opt10080(rqname, trcode)
-        elif rqname == "opt10080_req_ma":   # 분봉 + MA 요청
-            self._on_opt10080(rqname, trcode)
+        if request_name == "opt10080_req":    # 분봉 차트 요청
+            self._on_opt10080(request_name, trcode)
+        elif request_name == "opt10080_req_ma":   # 분봉 + MA 요청
+            self._on_opt10080(request_name, trcode)
             self._get_signal_ma()
+        elif request_name == "send_order_req":    # 주문
+            pass
 
         # event loop 종료
         try:
@@ -127,6 +157,7 @@ class SbCore(QAxWidget):
         """
         self.OnEventConnect.connect(self._on_connect)
         self.OnReceiveTrData.connect(self._on_receive_tr_data)
+        self.OnReceiveMsg.connect(self._on_receive_msg)
 
     def comm_connect(self):
         self.dynamicCall("CommConnect()")
@@ -134,9 +165,31 @@ class SbCore(QAxWidget):
         self.login_event_loop.exec_()
 
     def comm_rq_data(self, rqname, trcode, next, screen_no):
-        self.dynamicCall("CommRqData(QString, QString, int, QString)", rqname, trcode, next, screen_no)
+        """
+        Send request to server
+        :param rqname: string - TR request name
+        :param trcode: string
+        :param next: int(0: 다음 데이터 없음, 2: 남은 데이터 조회)
+        :param screen_no: string - 화면번호
+        :return: n/a
+        """
+        if not self.get_connect_state():
+            sys.exit(1)
+
+        return_code = self.dynamicCall("CommRqData(QString, QString, int, QString)",
+                         rqname, trcode, next, screen_no)
+
+        # 이벤트 루프 생성. _on_receive_tr_data()에서 종료
         self.tr_event_loop = QEventLoop()
         self.tr_event_loop.exec_()
+
+    def get_connect_state(self):
+        """
+        현재 connection state 반환
+        :return: int (0: 접속 해제, 1: 연결)
+        """
+        ret = self.dynamicCall("GetConnectState()")
+        return ret
 
     def set_symbol(self, value):
         """
