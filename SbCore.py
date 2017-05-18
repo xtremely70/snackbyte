@@ -62,7 +62,7 @@ class SbCore(QAxWidget):
         if ma20_delta >= 0:
             if (ma5_previous < ma10_previous) and (ma5 >= ma10):    # long position
                 print("Long signal : ", self.current_symbol)
-                self._sendOrder("send_order_req", "0101", self.account_no, "1", self.current_symbol,
+                self._sendOrder("자동매수주문", "0101", self.account_no, "1", self.current_symbol,
                                 10, 0, "03", "")
 
     def _on_connect(self, err_code):
@@ -98,6 +98,15 @@ class SbCore(QAxWidget):
 
     def _on_send_order(self, rqname, trcode):
         pass
+
+    def _on_receive_chejan_data(self, gubun, item_cnt, fid_list):
+        order_no = self.dynamicCall("GetChejanData(int)", 9203)  # 주문번호
+        symbol = self.dynamicCall("GetChejanData(int)", 9001)  # 종목코드
+        symbol_name = self.dynamicCall("GetChejanData(int)", 302)  # 종목명
+        order_quantity = self.dynamicCall("GetChejanData(int)", 900)  # 주문수량
+        order_price = self.dynamicCall("GetChejanData(int)", 901)  # 주문가격
+
+        print(gubun, order_no, symbol, symbol_name, order_quantity, "주", order_price, "원")
 
     def _on_receive_msg(self, screen_no, request_name, tr_code, msg):
         """
@@ -137,8 +146,8 @@ class SbCore(QAxWidget):
         elif request_name == "opt10080_req_ma":   # 분봉 + MA 요청
             self._on_opt10080(request_name, trcode)
             self._get_signal_ma()
-        elif request_name == "send_order_req":    # 주문
-            pass
+        elif request_name == "자동매수주문":    # 주문
+            print(request_name, "TR data received successfully.")
 
         # event loop 종료
         try:
@@ -158,6 +167,7 @@ class SbCore(QAxWidget):
         self.OnEventConnect.connect(self._on_connect)
         self.OnReceiveTrData.connect(self._on_receive_tr_data)
         self.OnReceiveMsg.connect(self._on_receive_msg)
+        self.OnReceiveChejanData.connect(self._on_receive_chejan_data)
 
     def comm_connect(self):
         self.dynamicCall("CommConnect()")
