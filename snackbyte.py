@@ -10,6 +10,9 @@ form_class = uic.loadUiType("mainwindow.ui")[0]
 
 
 class MyWindow(QMainWindow, form_class):
+
+    BASKET_SIZE = 3
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -17,8 +20,8 @@ class MyWindow(QMainWindow, form_class):
         self.sbcore = SbCore()
         self.sbcore.comm_connect()
 
-        # variables
-        # self.watchList = ['004720']     # for testing only
+        # init class variables
+        self.sbcore.basket_size = self.BASKET_SIZE
         self.watchList = ['008970', '033250', '004720', '008700', '003490', '009270']     # for testing only
 
     def automate_job(self):

@@ -9,11 +9,14 @@ class SbCore(QAxWidget):
         super().__init__()
 
         # list of variables
+        self.basket_size = 3        # default value
+        self.budget = 100000        # budget for each item
         self.account_no = '8090377411'
         self.sn = '0000'
         self.login_event_loop = None
         self.tr_event_loop = None
         self.current_symbol = None
+        self.basket = list()        # list of symbols
 
         self._create_kw_instance()
         self._set_signal_slots()
@@ -40,6 +43,8 @@ class SbCore(QAxWidget):
         # retrieve close price from self.ohlcv
         for i in range(21):
             date, open_price, high, low, close, volume = self.ohlcv[i]
+            if i == 0:
+                current_price = close
             # print(i, self.ohlcv[i])
             close20.append(abs(int(close)))
 
@@ -62,8 +67,12 @@ class SbCore(QAxWidget):
         if ma20_delta >= 0:
             if (ma5_previous < ma10_previous) and (ma5 >= ma10):    # long position
                 print("Long signal : ", self.current_symbol)
+                qty = int(self.budget * .95 / current_price)
+                print("buying price: ", qty)
                 self._sendOrder("자동매수주문", "0101", self.account_no, "1", self.current_symbol,
-                                10, 0, "03", "")
+                                qty, 0, "03", "")
+                self.basket.append(self.current_symbol)
+                print("Current basket: ", self.basket)
 
     def _on_connect(self, err_code):
         if err_code == 0:   # connected successfully
@@ -218,6 +227,16 @@ class SbCore(QAxWidget):
         :return: 
         """
         self.dynamicCall("SetInputValue(QString, QString)", id, value)
+
+
+class Stock:
+
+    def __init__(self, symbol, price):
+
+        # variables
+        self.symbol = symbol
+        self.buy_price = price
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
