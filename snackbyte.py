@@ -22,7 +22,7 @@ class MyWindow(QMainWindow, form_class):
 
         # init class variables
         self.sbcore.basket_size = self.BASKET_SIZE
-        self.watchList = ['008970', '033250', '004720', '008700', '003490', '009270']     # for testing only
+        self.watchList = ['008970', '033250', '004720', '008700', '003490', '009270', '001550']     # for testing only
 
     def automate_job(self):
         # overlapping call 피하기 위해서 singleShot으로 call
@@ -57,7 +57,7 @@ class MyWindow(QMainWindow, form_class):
 
             # print("starting comm_rq_data of ", symbol)
             self.sbcore.comm_rq_data("opt10080_req_ma", "opt10080", 0, "0101")
-            sleep(0.3)  # 초당 api call 초과하지 않도록
+            sleep(0.25)  # 초당 api call 초과하지 않도록
 
 
 if __name__ == "__main__":

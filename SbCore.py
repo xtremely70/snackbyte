@@ -44,7 +44,7 @@ class SbCore(QAxWidget):
         for i in range(21):
             date, open_price, high, low, close, volume = self.ohlcv[i]
             if i == 0:
-                current_price = close
+                current_price = abs(int(close))     # close는 string
             # print(i, self.ohlcv[i])
             close20.append(abs(int(close)))
 
@@ -67,7 +67,8 @@ class SbCore(QAxWidget):
         if ma20_delta >= 0:
             if (ma5_previous < ma10_previous) and (ma5 >= ma10):    # long position
                 print("Long signal : ", self.current_symbol)
-                qty = int(self.budget * .95 / current_price)
+                print("Budget: ", self.budget, "current price: ", current_price)
+                qty = int(self.budget / current_price)
                 print("buying price: ", qty)
                 self._sendOrder("자동매수주문", "0101", self.account_no, "1", self.current_symbol,
                                 qty, 0, "03", "")
