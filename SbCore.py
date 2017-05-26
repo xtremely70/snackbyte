@@ -55,16 +55,18 @@ class SbCore(QAxWidget):
 
         ma10 = round(sum(close20[:10])/10)
         ma10_previous = round(sum(close20[1:11])/10)
+        ma10_delta = ma10 - ma10_previous
 
         ma5 = round(sum(close20[:5])/5)
         ma5_previous = round(sum(close20[1:6])/5)
+        ma5_delta = ma5 - ma5_previous
 
         print(self.current_symbol, "MA20, MA10, MA5 현재: ", ma20, ma10, ma5,
               "과거: ", ma20_previous, ma10_previous, ma5_previous)
         # print("MA20:", ma20, ma20_previous, ma20_delta, "MA10:", ma10, ma10_previous, "MA5:", ma5, ma5_previous)
 
         # set position
-        if ma20_delta >= 0:
+        if (ma20_delta >= 0) and (ma10_delta >= 0) and (ma5_delta > 0):
             if (ma5_previous < ma10_previous) and (ma5 >= ma10):    # long position
                 print("Long signal : ", self.current_symbol)
                 print("Budget: ", self.budget, "current price: ", current_price)
