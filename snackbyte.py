@@ -34,6 +34,7 @@ class MyWindow(QMainWindow, form_class):
 
             # OHLCV 값 받아옴
             if current_time.minute % 10 == 0:   # 10분 단위
+                self.search_short_signal()
                 self.get_ohlcv()
 
         finally:
@@ -57,6 +58,24 @@ class MyWindow(QMainWindow, form_class):
 
             # print("starting comm_rq_data of ", symbol)
             self.sbcore.comm_rq_data("opt10080_req_ma", "opt10080", 0, "0101")
+            sleep(0.25)  # 초당 api call 초과하지 않도록
+
+    def search_short_signal(self):
+        """
+        basket에 담긴 종목들의 셀 시그널 검색
+        :return:
+        """
+        print("===========================================",
+              "매도신호검색 시작:", self.sbcore.basket,
+              datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+        for symbol in self.sbcore.basket:
+            self.sbcore.set_symbol(symbol)  # Set sbcore's symbol
+            self.sbcore.set_input_value("종목코드", symbol)
+            self.sbcore.set_input_value("틱범위", "10")
+            self.sbcore.set_input_value("수정주가구분", 1)
+
+            self.sbcore.comm_rq_data("매도신호검색", "opt10080", 0, "0101")
             sleep(0.25)  # 초당 api call 초과하지 않도록
 
 

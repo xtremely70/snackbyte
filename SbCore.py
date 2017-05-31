@@ -77,6 +77,38 @@ class SbCore(QAxWidget):
                 self.basket.append(self.current_symbol)
                 print("Current basket: ", self.basket)
 
+    def _get_signal_sell(self):
+        """
+        request_name == "매도신호검색" 대응
+        :return:
+        """
+        close20 = list()
+
+        # retrieve close price from self.ohlcv
+        for i in range(21):
+            date, open_price, high, low, close, volume = self.ohlcv[i]
+            if i == 0:
+                current_price = abs(int(close))     # close는 string
+            # print(i, self.ohlcv[i])
+            close20.append(abs(int(close)))
+
+        # calculate ma20, ma10, ma5
+        ma20 = round(sum(close20[:20])/20)
+        ma20_previous = round(sum(close20[1:21])/20)
+        ma20_delta = ma20 - ma20_previous
+
+        ma10 = round(sum(close20[:10])/10)
+        ma10_previous = round(sum(close20[1:11])/10)
+        ma10_delta = ma10 - ma10_previous
+
+        ma5 = round(sum(close20[:5])/5)
+        ma5_previous = round(sum(close20[1:6])/5)
+        ma5_delta = ma5 - ma5_previous
+
+        if ma5 < ma10:
+            print("Short signal : ", self.current_symbol, "current price: ", current_price)
+            self.basket.remove(self.current_symbol)
+
     def _on_connect(self, err_code):
         if err_code == 0:   # connected successfully
             print("connected")
@@ -130,7 +162,7 @@ class SbCore(QAxWidget):
         :return: n/a
         """
         self.msg = request_name + ": " + msg
-        print(self.msg)
+        print("_on_receive_msg", self.msg)
 
     def _on_receive_tr_data(self, screen_no, request_name, trcode,
                             record_name, next, unused1, unused2, unused3, unused4):
@@ -160,6 +192,10 @@ class SbCore(QAxWidget):
             self._get_signal_ma()
         elif request_name == "자동매수주문":    # 주문
             print(request_name, "TR data received successfully.")
+        elif request_name == "매도신호검색":      # searching for short signal
+            # print(request_name, "TR data received successfully.")
+            self._get_signal_sell()
+
 
         # event loop 종료
         try:
