@@ -20,6 +20,10 @@ class MyWindow(QMainWindow, form_class):
         self.sbcore = SbCore()
         self.sbcore.comm_connect()
 
+        # get account info
+        # self.num_of_accounts = self.sbcore._get_login_info("ACCOUNT_CNT")
+        # self.account_no = self.sbcore._get_login_info("ACCNO")
+
         # init class variables
         self.sbcore.basket_size = self.BASKET_SIZE
         self.watchList = ['008970', '033250', '004720', '008700', '003490', '009270', '001550']     # for testing only

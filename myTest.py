@@ -17,4 +17,8 @@ if __name__ == "__main__":
     myWindow = MyWindow4Test()
     myWindow.show()
 
+    accounts_num = int(myWindow.sbcore._get_login_info("ACCOUNT_CNT"))
+    accounts = myWindow.sbcore._get_login_info("ACCNO")
+    print(accounts_num, accounts)
+
     app.exec_()
