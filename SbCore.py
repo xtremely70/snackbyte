@@ -29,6 +29,10 @@ class SbCore(QAxWidget):
     def _create_kw_instance(self):
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
 
+    def _get_login_info(self, tag):
+        ret = self.dynamicCall("GetLoginInfo(QString)", tag)
+        return ret
+
     def _get_repeat_cnt(self, trcode, rqname):
         ret = self.dynamicCall("GetRepeatCnt(QString, QString)", trcode, rqname)
         return ret
@@ -149,8 +153,12 @@ class SbCore(QAxWidget):
         symbol_name = self.dynamicCall("GetChejanData(int)", 302)  # 종목명
         order_quantity = self.dynamicCall("GetChejanData(int)", 900)  # 주문수량
         order_price = self.dynamicCall("GetChejanData(int)", 901)  # 주문가격
+        final_quantity = self.dynamicCall("GetChejanData(int)", 911)    # 체결량
+        final_price = self.dynamicCall("GetChejanData(int)", 910)  # 체결가
+        final_order_no = self.dynamicCall("GetChejanData(int)", 909)  # 체결번호
 
-        print(gubun, order_no, symbol, symbol_name, order_quantity, "주", order_price, "원")
+        print(gubun, order_no, symbol, symbol_name, "주문: ", order_quantity, "주", order_price, "원",
+              ", 체결:", final_quantity, "주", final_price, "원")
 
     def _on_receive_msg(self, screen_no, request_name, tr_code, msg):
         """
